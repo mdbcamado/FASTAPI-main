@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Classifier Dashboard</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://source.unsplash.com/1600x900/?fruits');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Fixed Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Adjust body to prevent content from being hidden behind fixed header */
+        body {
+            padding-top: 70px;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 400px;
+        }
+
+        h3 {
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .message-box {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .metrics-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .metrics-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .metrics-box li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed Header with Logout Button -->
+    <div class="header">
+        <h2>🍎 Fruit Classifier Dashboard 🍌</h2>
+        <a href="/logout">
+            <button class="logout-btn">Logout 🚪</button>
+        </a>
+    </div>
+
+    <!-- Flash Message -->
+    {% if message %}
+        <div class="message-box {% if '✅' in message %}success{% else %}error{% endif %}">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <div class="container">
+        <!-- Prediction Section -->
+        <div class="box">
+            <h3>🔍 Predict Fruit Type</h3>
+            <form action="/predict/" method="post">
+                <div class="form-group">
+                    <label for="mass">Mass:</label>
+                    <input type="number" step="0.01" name="mass" required>
+                </div>
+                <div class="form-group">
+                    <label for="width">Width:</label>
+                    <input type="number" step="0.01" name="width" required>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height:</label>
+                    <input type="number" step="0.01" name="height" required>
+                </div>
+                <div class="form-group">
+                    <label for="color_score">Color Score:</label>
+                    <input type="number" step="0.01" name="color_score" required>
+                </div>
+                <button type="submit">Predict 🍏</button>
+            </form>
+
+            {% if prediction %}
+                <p>📝 Predicted Fruit: <strong>{{ prediction }}</strong></p>
+            {% endif %}
+        </div>
+
+        <!-- Upload & Retrain Section -->
+        <div class="box">
+            <h3>📂 Upload & Retrain</h3>
+
+            <!-- File Upload -->
+            <form action="/upload/" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" name="file" required>
+                </div>
+                <button type="submit">Upload Dataset 📁</button>
+            </form>
+
+            <!-- Retrain Model -->
+            <form action="/retrain/" method="post" style="margin-top: 10px;">
+                <button type="submit">Retrain Model 🔄</button>
+            </form>
+
+            <!-- Model Metrics -->
+            {% if metrics %}
+                <div class="metrics-box">
+                    <h3>📊 Model Performance</h3>
+                    <ul>
+                        <li><b>Accuracy:</b> {{ (metrics.accuracy * 100)|round(2) }}%</li>
+                        <li><b>Precision:</b> {{ (metrics.precision * 100)|round(2) }}%</li>
+                        <li><b>Recall:</b> {{ (metrics.recall * 100)|round(2) }}%</li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>
